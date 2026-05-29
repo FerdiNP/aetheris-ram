@@ -4,7 +4,7 @@
 
 ![Aetheris Logo](resources/aetheris-logo.png)
 
-**Forked From [Sentra](https://github.com/sashaga2a24/sentra)**
+**Forked From [Sentra](https://github.com/sashaga2a24/sentra)** by [sashaga2a24](https://github.com/sashaga2a24/sentra)
 
 **A powerful, cross-platform desktop application for managing your Roblox accounts.**
 
