@@ -1,0 +1,65 @@
+// Consolidated Preload API modules - grouped by domain
+export { invoke } from './invoke'
+
+// User domain (accounts, users, friends)
+export { accountApi, usersApi, friendsApi } from './user'
+
+// Avatar domain (avatar, inventory, catalog, catalog database)
+export { avatarApi, inventoryApi, catalogApi, catalogDatabaseApi } from './avatar'
+
+// Games domain (games, groups)
+export { gamesApi, groupsApi } from './games'
+
+// System domain (system, pin, install, netlog, catalogDb, app)
+export { systemApi, licenseApi, pinApi, installApi, netlogApi, catalogDbApi, appApi } from './system'
+
+// Auth
+export { authApi } from './auth'
+
+// External APIs
+export { rolimonsApi } from './rolimons'
+
+// Transactions
+export { transactionsApi } from './transactions'
+
+// Updater
+export { updaterApi } from './updater'
+
+// News
+export { newsApi } from './news'
+
+// Account Settings
+export { accountSettingsApi } from './accountSettings'
+
+// Discord RPC
+export { discordRPCApi } from './discordRPC'
+
+// Watcher
+export { watcherApi } from './watcher'
+export { optimizationApi } from './optimization'
+export { antiAfkApi } from './antiAfk'
+
+// Macro
+export { macroApi } from './macro'
+
+// Sniper
+export { sniperApi } from './sniper'
+
+// Generator
+export { generatorApi } from './generator'
+
+// Proxy
+export { proxyApi } from './proxy'
+
+// ============================================================================
+// NEW PRODUCTION MODULES
+// ============================================================================
+
+// Trading Module
+export { tradingApi } from './trading'
+
+// Browser Automation Module
+export { browserApi } from './trading-browser'
+
+// Proxy Management Module
+export { proxyMgmtApi } from './proxy-management'

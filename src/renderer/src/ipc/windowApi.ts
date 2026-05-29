@@ -1,0 +1,1375 @@
+import type { Account } from '../types'
+import type {
+  AccountStats,
+  AvatarState,
+  CaptchaResponse,
+  CursorResult,
+  DeployHistory,
+  DetectedInstallation,
+  DetailedStats,
+  ExtendedUserDetails,
+  FavoriteItem,
+  FFlags,
+  FriendStats,
+  InventoryPage,
+  OutfitCollection,
+  OutfitDetails,
+  Presence,
+  BatchAccountStatus,
+  QuickLoginCode,
+  QuickLoginStatus,
+  RegionLookup,
+  SettingsPatch,
+  SettingsSnapshot,
+  SuccessResponse,
+  ThumbnailBatch,
+  UpdateCheck,
+  UpdateOutfitResult,
+  UserSummary,
+  WearingAssetsResult,
+  ServerPage,
+  PrivateServerPage,
+  PrivateServerPayload,
+  UserPreview,
+  UsernameHistory,
+  UserGroupRole,
+  LogMetadata,
+  GamePassesResponse,
+  GroupWallPostsResponse,
+  GroupMembersResponse,
+  GroupStoreResponse,
+  TransactionTypes,
+  TransactionsResponse,
+  TransactionTypeEnum,
+  UpdateState,
+  UpdateActionResult,
+  UserProfileResponse,
+  VoiceSettings,
+  ProcessLogEntry
+} from '../../../shared/ipc-schemas/index'
+import type {
+  AccountSettingsJson,
+  UserSettingsAndOptions,
+  CombinedAccountSettings,
+  PrivacyLevel,
+  TradePrivacy,
+  TradeValue,
+  ContentRestrictionLevel,
+  RedeemPromoCodeResponse,
+  DescriptionResponse,
+  GenderResponse,
+  BirthdateResponse,
+  PromotionChannelsResponse,
+  OnlineStatusPrivacy
+} from '../../../shared/ipc-schemas/accountSettings'
+
+export interface UpdateSettingResult {
+  success: boolean
+  error?: string
+}
+
+export interface UsersApi {
+  getUserByUsername: (username: string) => Promise<UserSummary | null>
+  getAvatarUrlByUsername: (username: string) => Promise<{ success: boolean; url?: string }>
+  getExtendedUserDetails: (cookie: string, userId: number) => Promise<ExtendedUserDetails>
+  getUserGroups: (userId: number) => Promise<any[]>
+  getBatchUserDetails: (userIds: number[]) => Promise<Record<string, { id: number; name: string; displayName: string } | null>>
+  getDetailedStats: (cookie: string, userId: number) => Promise<DetailedStats>
+  getRobloxBadges: (cookie: string, userId: number) => Promise<any[]>
+  getPlayerBadges: (cookie: string, userId: number) => Promise<any>
+  getPastUsernames: (cookie: string, userId: number) => Promise<UsernameHistory>
+  getUserProfile: (cookie: string, userId: number) => Promise<UserProfileResponse>
+}
+
+export interface AccountApi {
+  validateCookie: (cookie: string) => Promise<UserSummary>
+  validateAndRefreshCookie: (cookie: string) => Promise<{ success: boolean; message?: string }>
+  getCookieHealthStatus: (cookie: string) => Promise<{
+    isValid: boolean
+    isExpiring: boolean
+    daysUntilExpiry: number
+    lastValidated?: string
+  }>
+  getAvatarUrl: (userId: string) => Promise<string>
+  getBatchUserAvatars: (
+    userIds: number[],
+    size?: string,
+    cookie?: string
+  ) => Promise<Record<number, string | null>>
+  getAssetContent: (url: string) => Promise<string>
+  fetchAccountStats: (cookie: string) => Promise<AccountStats>
+  getAccountStatus: (cookie: string) => Promise<Presence | null>
+  getVoiceSettings: (cookie: string) => Promise<VoiceSettings>
+  getBatchAccountStatuses: (cookies: string[], forceRefresh?: boolean) => Promise<BatchAccountStatus>
+  getUserPresence: (cookie: string, userId: number) => Promise<Presence | null>
+  getAccounts: () => Promise<Account[]>
+  saveAccounts: (accounts: Account[]) => Promise<void>
+  fetchFriendStats: (cookie: string, userId: string) => Promise<FriendStats>
+  getExtendedUserDetails: (cookie: string, userId: number) => Promise<ExtendedUserDetails>
+  getDetailedStats: (cookie: string, userId: number) => Promise<DetailedStats>
+  getCurrentAvatar: (cookie: string, userId?: number) => Promise<AvatarState>
+  setWearingAssets: (
+    cookie: string,
+    assets: Array<{
+      id: number
+      name: string
+      assetType: { id: number; name: string }
+      currentVersionId?: number
+      meta?: { order?: number; puffiness?: number; version?: number }
+    }>
+  ) => Promise<WearingAssetsResult>
+  renderAvatarPreview: (
+    cookie: string,
+    userId: number,
+    assetId: number
+  ) => Promise<{ imageUrl: string; renderType?: '2d' | '3d' }>
+  openRobloxLoginWindow: () => Promise<string>
+  openBrowserWithAccount: (accountId: string, url?: string) => Promise<void>
+}
+
+export interface FavoritesApi {
+  getFavoriteGames: () => Promise<string[]>
+  addFavoriteGame: (placeId: string) => Promise<void>
+  removeFavoriteGame: (placeId: string) => Promise<void>
+  getFavoriteItems: () => Promise<FavoriteItem[]>
+  addFavoriteItem: (item: FavoriteItem) => Promise<void>
+  removeFavoriteItem: (itemId: number) => Promise<void>
+}
+
+export interface SettingsApi {
+  // Window control
+  focusWindow: () => Promise<void>
+  hasConfig: () => Promise<boolean>
+
+  getSidebarWidth: () => Promise<number | undefined>
+  setSidebarWidth: (width: number) => Promise<void>
+  getSidebarCollapsed: () => Promise<boolean>
+  setSidebarCollapsed: (collapsed: boolean) => Promise<void>
+  getAccountsViewMode: () => Promise<'list' | 'grid'>
+  setAccountsViewMode: (mode: 'list' | 'grid') => Promise<void>
+  getAvatarRenderWidth: () => Promise<number | undefined>
+  setAvatarRenderWidth: (width: number) => Promise<void>
+  getSettings: () => Promise<SettingsSnapshot>
+  setSettings: (settings: SettingsPatch) => Promise<void>
+  getProcessLogs: () => Promise<ProcessLogEntry[]>
+  clearProcessLogs: () => Promise<boolean>
+  onProcessLogEntry: (callback: (entry: ProcessLogEntry) => void) => () => void
+  getExcludeFullGames: () => Promise<boolean>
+  setExcludeFullGames: (excludeFullGames: boolean) => Promise<void>
+  // Custom Fonts
+  getCustomFonts: () => Promise<{ family: string; url: string }[]>
+  addCustomFont: (font: { family: string; url: string }) => Promise<void>
+  removeCustomFont: (family: string) => Promise<void>
+  getActiveFont: () => Promise<string | null>
+  setActiveFont: (family: string | null) => Promise<void>
+  // Asset paths
+  getAssetPath: (assetPath: string) => Promise<string>
+  // Secure PIN verification - auth state managed in main process
+  verifyPin: (pin: string) => Promise<{
+    success: boolean
+    locked: boolean
+    remainingAttempts: number
+    lockoutSeconds?: number
+    accounts?: Account[]
+  }>
+  // Check if PIN is currently verified in main process
+  isPinVerified: () => Promise<boolean>
+  // Set PIN - requires current PIN if one is already set (security)
+  setPin: (
+    newPin: string | null,
+    currentPin?: string
+  ) => Promise<{
+    success: boolean
+    error?: string
+    locked?: boolean
+    lockoutSeconds?: number
+    remainingAttempts?: number
+  }>
+  getPinLockoutStatus: () => Promise<{
+    locked: boolean
+    lockoutSeconds?: number
+    remainingAttempts: number
+  }>
+  // User Agent Management
+  swapUserAgent: () => Promise<{
+    userAgent: string
+    index: number
+  }>
+  setUserAgentIndex: (index: number) => Promise<{
+    userAgent: string
+    index: number
+  }>
+  getCurrentUserAgent: () => Promise<{
+    userAgent: string
+    index: number
+  }>
+  getAllUserAgents: () => Promise<string[]>
+  setAutoSwapUserAgent: (enabled: boolean, intervalMinutes?: number) => Promise<{
+    autoSwapEnabled: boolean
+    intervalMinutes: number
+  }>
+  getUserAgentState: () => Promise<{
+    currentUserAgent: string
+    currentIndex: number
+    autoSwapEnabled: boolean
+    autoSwapIntervalMinutes: number
+    totalUserAgents: number
+  }>
+}
+
+export interface SocialApi {
+  getFriends: (
+    cookie: string,
+    targetUserId?: number,
+    forceRefresh?: boolean
+  ) => Promise<UserPreview[]>
+  getFriendsPaged: (
+    cookie: string,
+    targetUserId: number,
+    cursor?: string
+  ) => Promise<CursorResult<UserPreview>>
+  getFriendsStatuses: (cookie: string, userIds: number[]) => Promise<Presence[]>
+  getFollowers: (
+    cookie: string,
+    targetUserId: number,
+    cursor?: string
+  ) => Promise<CursorResult<UserPreview>>
+  getFollowings: (
+    cookie: string,
+    targetUserId: number,
+    cursor?: string
+  ) => Promise<CursorResult<UserPreview>>
+  getFriendRequests: (cookie: string) => Promise<UserPreview[]>
+  sendFriendRequest: (cookie: string, targetUserId: number) => Promise<CaptchaResponse>
+  acceptFriendRequest: (cookie: string, requesterUserId: number) => Promise<SuccessResponse>
+  declineFriendRequest: (cookie: string, requesterUserId: number) => Promise<SuccessResponse>
+  unfriend: (cookie: string, targetUserId: number) => Promise<SuccessResponse>
+  blockUser: (cookie: string, targetUserId: number) => Promise<SuccessResponse>
+  getUserByUsername: (username: string) => Promise<UserSummary | null>
+  getUserGroups: (userId: number) => Promise<UserGroupRole[]>
+}
+
+export interface GamesApi {
+  getGameSorts: (sessionId?: string) => Promise<any[]>
+  getGamesInSort: (sortId: string, sessionId?: string) => Promise<any[]>
+  getGamesByPlaceIds: (placeIds: string[]) => Promise<any[]>
+  getGamesByUniverseIds: (universeIds: number[]) => Promise<any[]>
+  searchGames: (query: string, sessionId?: string) => Promise<any[]>
+  getRecentlyPlayedGames: (sessionId?: string, accountId?: string) => Promise<any[]>
+  launchGame: (
+    cookie: string,
+    placeId: string | number,
+    jobId?: string,
+    friendId?: string | number,
+    installPath?: string
+  ) => Promise<SuccessResponse>
+  generateQuickLoginCode: () => Promise<QuickLoginCode>
+  checkQuickLoginStatus: (code: string, privateKey: string) => Promise<QuickLoginStatus>
+  completeQuickLogin: (code: string, privateKey: string) => Promise<string>
+  getGameServers: (
+    placeId: string | number,
+    cursor?: string,
+    limit?: number,
+    sortOrder?: 'Asc' | 'Desc',
+    excludeFullGames?: boolean
+  ) => Promise<ServerPage>
+  getPrivateServers: (
+    placeId: string | number,
+    accountId?: string,
+    cursor?: string,
+    limit?: number
+  ) => Promise<PrivateServerPage>
+  createPrivateServer: (
+    placeId: string | number,
+    accountId: string,
+    name: string,
+    expectedPrice?: number
+  ) => Promise<any>
+  getPrivateServerDetails: (serverId: string | number, accountId: string) => Promise<any>
+  updatePrivateServer: (
+    serverId: string | number,
+    accountId: string,
+    updates: { name?: string; active?: boolean; newJoinCode?: boolean }
+  ) => Promise<any>
+  updatePrivateServerSubscription: (
+    serverId: string | number,
+    accountId: string,
+    updates: { active?: boolean; price?: number }
+  ) => Promise<any>
+  updatePrivateServerPermissions: (
+    serverId: string | number,
+    accountId: string,
+    updates: { friendsAllowed?: boolean; usersToAdd?: number[]; usersToRemove?: number[] }
+  ) => Promise<any>
+  launchPrivateServer: (
+    accountId: string,
+    placeId: string | number,
+    accessCode: string,
+    linkCode?: string
+  ) => Promise<SuccessResponse>
+  getServerRegion: (placeId: string | number, serverId: string) => Promise<string>
+  getJoinScript: (placeId: string | number, serverId: string) => Promise<any>
+  getServerQueuePosition: (placeId: string | number, serverId: string) => Promise<number | null>
+  getRegionFromAddress: (address: string) => Promise<string>
+  getRegionsBatch: (addresses: string[]) => Promise<RegionLookup>
+  getGameThumbnail16x9: (universeId: number) => Promise<string[]>
+  getGameIconThumbnail: (universeId: number) => Promise<string | null>
+  getGameSocialLinks: (universeId: number) => Promise<any[]>
+  voteOnGame: (placeId: number, vote: boolean | null) => Promise<any>
+  getGamePasses: (universeId: number) => Promise<GamePassesResponse>
+  purchaseGamePass: (
+    cookie: string,
+    productId: number,
+    expectedPrice: number,
+    expectedSellerId: number,
+    expectedPurchaserId?: string,
+    idempotencyKey?: string
+  ) => Promise<any>
+  saveGameImage: (
+    imageUrl: string,
+    gameName: string
+  ) => Promise<{ success: boolean; canceled?: boolean; path?: string }>
+}
+
+export interface AvatarScales {
+  height: number
+  width: number
+  head: number
+  proportion: number
+  bodyType: number
+}
+
+export interface AvatarApi {
+  getBatchThumbnails: (
+    targetIds: number[],
+    type?: 'Asset' | 'Outfit' | 'BadgeIcon' | 'GroupIcon'
+  ) => Promise<ThumbnailBatch>
+  getUserOutfits: (
+    cookie: string,
+    userId: number,
+    isEditable: boolean,
+    page: number
+  ) => Promise<OutfitCollection>
+  wearOutfit: (cookie: string, outfitId: number) => Promise<SuccessResponse>
+  setBodyColors: (cookie: string, bodyColors: any) => Promise<SuccessResponse>
+  setAvatarScales: (cookie: string, scales: AvatarScales) => Promise<SuccessResponse>
+  setPlayerAvatarType: (cookie: string, playerAvatarType: 'R6' | 'R15') => Promise<SuccessResponse>
+  updateOutfit: (cookie: string, outfitId: number, details: any) => Promise<UpdateOutfitResult>
+  getOutfitDetails: (cookie: string, outfitId: number) => Promise<OutfitDetails>
+  deleteOutfit: (cookie: string, outfitId: number) => Promise<SuccessResponse>
+  purchaseLimitedItem: (
+    cookie: string,
+    collectibleItemInstanceId: string,
+    expectedPrice: number,
+    sellerId: number,
+    collectibleProductId: string
+  ) => Promise<any>
+  purchaseCatalogItem: (
+    cookie: string,
+    collectibleItemId: string,
+    expectedPrice: number,
+    expectedSellerId: number,
+    collectibleProductId?: string,
+    expectedPurchaserId?: string,
+    idempotencyKey?: string
+  ) => Promise<any>
+  getAssetHierarchy: (assetId: number) => Promise<any>
+  // 3D Manifest APIs - authenticated
+  getAvatar3DManifest: (
+    cookie: string,
+    userId: number | string
+  ) => Promise<{
+    imageUrl: string
+    state?: string
+    moderated?: boolean
+    reason?: string
+    banExpiresAt?: string
+  }>
+  getAsset3DManifest: (cookie: string, assetId: number | string) => Promise<{ imageUrl: string }>
+}
+
+export interface InventoryApi {
+  getInventory: (
+    cookie: string,
+    userId: number,
+    assetTypeId: number,
+    cursor?: string
+  ) => Promise<InventoryPage>
+  getInventoryV2: (
+    cookie: string,
+    userId: number,
+    assetTypes: string[],
+    cursor?: string,
+    limit?: number,
+    sortOrder?: 'Asc' | 'Desc'
+  ) => Promise<InventoryPage>
+  getRobloxBadges: (cookie: string, userId: number) => Promise<any[]>
+  getPlayerBadges: (cookie: string, userId: number) => Promise<any>
+  getCollectibles: (cookie: string, userId: number) => Promise<any>
+  getPastUsernames: (cookie: string, userId: number) => Promise<UsernameHistory>
+  getUserProfile: (cookie: string, userId: number) => Promise<UserProfileResponse>
+  checkAssetOwnership: (
+    cookie: string,
+    userId: number,
+    assetId: number,
+    itemType?: string
+  ) => Promise<boolean>
+}
+
+export interface LogsApi {
+  getLogs: (verbose?: boolean) => Promise<LogMetadata[]>
+  getLogContent: (filename: string) => Promise<string>
+  deleteLog: (filename: string) => Promise<boolean>
+  deleteAllLogs: () => Promise<boolean>
+  openLogFile: (filename: string) => Promise<boolean>
+}
+
+export interface DeployApi {
+  getDeployHistory: (force?: boolean) => Promise<DeployHistory>
+}
+
+export interface InstallationsApi {
+  installRobloxVersion: (
+    binaryType: string,
+    version: string,
+    installPath?: string
+  ) => Promise<string | null>
+  launchRobloxInstall: (installPath: string) => Promise<void>
+  uninstallRobloxVersion: (installPath: string) => Promise<void>
+  openRobloxFolder: (installPath: string) => Promise<void>
+  checkForUpdates: (binaryType: string, currentVersionHash: string) => Promise<UpdateCheck>
+  verifyRobloxFiles: (binaryType: string, version: string, installPath: string) => Promise<boolean>
+  setActiveInstall: (installPath: string) => Promise<void>
+  removeActiveInstall: () => Promise<void>
+  getActiveInstallPath: () => Promise<string | null>
+  installFont: (installPath: string, fontPath: string) => Promise<void>
+  installCursor: (installPath: string, cursorPath: string) => Promise<void>
+  detectDefaultInstallations: () => Promise<DetectedInstallation[]>
+  createBackup: (accounts: unknown[], backupPin: string, savePath?: string) => Promise<string>
+  listBackups: () => Promise<Array<{ path: string; filename: string; createdAt: string; size: number }>>
+  createAutoBackup: (backupPin: string) => Promise<string | null>
+  restoreBackup: (
+    filepath: string,
+    backupPin: string
+  ) => Promise<unknown[] | { accounts: unknown[]; settings?: unknown }>
+  pickBackupFile: () => Promise<string>
+  chooseBackupLocation: () => Promise<string>
+  selectInstallationDirectory: () => Promise<string>
+}
+
+export interface FlagsApi {
+  getFFlags: (installPath: string) => Promise<FFlags>
+  setFFlags: (installPath: string, flags: FFlags) => Promise<void>
+}
+
+// Rolimons API response types
+export interface RolimonsItemDetails {
+  success: boolean
+  item_count: number
+  items: Record<string, (string | number)[]>
+}
+
+export interface RolimonsPlayerData {
+  name?: string
+  value?: number | null
+  rap?: number | null
+  rank?: number | null
+  premium?: boolean
+  privacy_enabled?: boolean
+  terminated?: boolean
+  stats_updated?: number | null
+  last_online?: number | null
+  last_location?: string
+  rolibadges?: Record<string, number>
+}
+
+export interface RolimonsItemPageData {
+  itemDetails: {
+    item_id?: number | null
+    item_name?: string | null
+    asset_type_id?: number | null
+    original_price?: number | null
+    created?: number | null
+    first_timestamp?: number | null
+    best_price?: number | null
+    favorited?: number | null
+    num_sellers?: number | null
+    rap?: number | null
+    owners?: number | null
+    bc_owners?: number | null
+    copies?: number | null
+    deleted_copies?: number | null
+    bc_copies?: number | null
+    hoarded_copies?: number | null
+    acronym?: string | null
+    valuation_method?: string | null
+    value?: number | null
+    demand?: number | null
+    trend?: number | null
+    projected?: number | null
+    hyped?: number | null
+    rare?: number | null
+    thumbnail_url_lg?: string | null
+  } | null
+  historyData: {
+    num_points?: number | null
+    timestamp?: number[] | null
+    favorited?: number[] | null
+    rap?: number[] | null
+    best_price?: number[] | null
+    num_sellers?: number[] | null
+  } | null
+  salesData: {
+    num_points?: number | null
+    timestamp?: number[] | null
+    avg_daily_sales_price?: number[] | null
+    sales_volume?: number[] | null
+  } | null
+  ownershipData: {
+    id?: number | null
+    num_points?: number | null
+    timestamps?: number[] | null
+    owners?: number[] | null
+    bc_owners?: number[] | null
+    copies?: number[] | null
+    deleted_copies?: number[] | null
+    bc_copies?: number[] | null
+    hoarded_copies?: number[] | null
+  } | null
+  hoardsData: {
+    num_hoards?: number | null
+    owner_ids?: string[] | null
+    owner_names?: string[] | null
+    quantities?: number[] | null
+  } | null
+  valueChanges: (number | string | boolean | null)[][] | null
+}
+
+export interface RolimonsApi {
+  getRolimonsItemDetails: () => Promise<RolimonsItemDetails>
+  getRolimonsPlayer: (userId: number) => Promise<RolimonsPlayerData>
+  getRolimonsItemPage: (itemId: number) => Promise<RolimonsItemPageData>
+}
+
+export interface NetLogApi {
+  getNetLogStatus: () => Promise<{ isLogging: boolean; logPath: string | null }>
+  getNetLogPath: () => Promise<string>
+  stopNetLog: () => Promise<{ success: boolean; message: string }>
+  startNetLog: () => Promise<{ success: boolean; message: string; path?: string }>
+}
+
+export interface CatalogSearchItem {
+  id: number
+  itemType: string
+  assetType?: number
+  name: string
+  description?: string | null
+  creatorName?: string
+  creatorTargetId?: number
+  creatorHasVerifiedBadge?: boolean
+  price?: number | null
+  lowestPrice?: number | null
+  lowestResalePrice?: number | null
+  priceStatus?: string
+  favoriteCount?: number
+  collectibleItemId?: string | null
+  totalQuantity?: number
+  hasResellers?: boolean
+  isOffSale?: boolean
+  itemStatus?: string[]
+  itemRestrictions?: string[]
+}
+
+export interface CatalogSearchResponse {
+  keyword?: string
+  previousPageCursor?: string | null
+  nextPageCursor?: string | null
+  data: CatalogSearchItem[]
+}
+
+export interface CatalogCategory {
+  category: string
+  taxonomy: string
+  assetTypeIds: number[]
+  bundleTypeIds: number[]
+  categoryId: number
+  name: string
+  orderIndex: number
+  subcategories: CatalogSubcategory[]
+  isSearchable: boolean
+}
+
+export interface CatalogSubcategory {
+  subcategory: string
+  taxonomy: string
+  assetTypeIds: number[]
+  bundleTypeIds: number[]
+  subcategoryId: number
+  name: string
+  shortName?: string | null
+}
+
+export interface CatalogItemsSearchParams {
+  keyword?: string
+  taxonomy?: string
+  subcategory?: string
+  sortType?: number
+  sortAggregation?: number
+  salesTypeFilter?: number
+  minPrice?: number
+  maxPrice?: number
+  creatorName?: string
+  creatorType?: string
+  limit?: number
+  cursor?: string
+  includeNotForSale?: boolean
+  cookie?: string // Optional cookie for authenticated requests (higher rate limits)
+}
+
+export interface CatalogItemsSearchResponse {
+  keyword?: string | null
+  previousPageCursor?: string | null
+  nextPageCursor?: string | null
+  data: CatalogSearchItem[]
+}
+
+export interface CatalogApi {
+  searchCatalog: (
+    keyword: string,
+    limit?: number,
+    creatorName?: string
+  ) => Promise<CatalogSearchResponse>
+  getCatalogNavigation: () => Promise<CatalogCategory[]>
+  searchCatalogItems: (params: CatalogItemsSearchParams) => Promise<CatalogItemsSearchResponse>
+  getCatalogSearchSuggestions: (prefix: string, limit?: number) => Promise<string[]>
+  getCatalogThumbnails: (
+    items: Array<{ id: number; itemType: string }>
+  ) => Promise<Record<string, string>>
+  downloadCatalogTemplate: (
+    assetId: number,
+    assetName: string,
+    cookie?: string
+  ) => Promise<{ success: boolean; message?: string; path?: string }>
+}
+
+// Groups API types
+export interface GroupDetails {
+  id: number
+  name: string
+  description?: string | null
+  owner?: {
+    hasVerifiedBadge?: boolean
+    userId?: number
+    username?: string
+    displayName?: string
+  } | null
+  shout?: {
+    body: string
+    poster?: any
+    created: string
+    updated: string
+  } | null
+  memberCount?: number
+  isBuildersClubOnly?: boolean
+  publicEntryAllowed?: boolean
+  hasVerifiedBadge?: boolean
+  hasSocialModules?: boolean
+  isLocked?: boolean
+}
+
+export interface GroupV2 {
+  id: number
+  name: string
+  description?: string | null
+  owner?: { id: number; type: string } | null
+  created?: string
+  hasVerifiedBadge?: boolean
+}
+
+export interface GroupRolesResponse {
+  groupId: number
+  roles: Array<{
+    id: number
+    name: string
+    rank: number
+    memberCount?: number
+  }>
+}
+
+export interface GroupGamesResponse {
+  previousPageCursor?: string | null
+  nextPageCursor?: string | null
+  data: Array<{
+    id: number
+    name: string
+    description?: string | null
+    creator?: { id: number; type: string }
+    rootPlace?: { id: number; type: string }
+    created?: string
+    updated?: string
+    placeVisits?: number
+  }>
+}
+
+export interface UserGroupMembership {
+  group: {
+    id: number
+    name: string
+    description?: string | null
+    owner?: any
+    memberCount?: number
+    hasVerifiedBadge?: boolean
+  }
+  role: {
+    id: number
+    name: string
+    rank: number
+  }
+  isPrimaryGroup?: boolean
+}
+
+export interface PendingGroupRequest {
+  group: {
+    id: number
+    name: string
+    description?: string | null
+    owner?: any
+    memberCount?: number
+    hasVerifiedBadge?: boolean
+  }
+  created?: string
+}
+
+export interface GroupSocialLink {
+  id: number
+  type: string
+  url: string
+  title: string
+}
+
+export interface GroupsApi {
+  getGroupDetails: (groupId: number, cookie?: string) => Promise<GroupDetails>
+  getBatchGroupDetails: (groupIds: number[]) => Promise<GroupV2[]>
+  getGroupRoles: (groupId: number) => Promise<GroupRolesResponse>
+  getGroupGames: (groupId: number, cursor?: string, limit?: number) => Promise<GroupGamesResponse>
+  getGroupWallPosts: (
+    groupId: number,
+    cursor?: string,
+    limit?: number
+  ) => Promise<GroupWallPostsResponse>
+  getGroupMembers: (
+    groupId: number,
+    cursor?: string,
+    limit?: number,
+    roleId?: number
+  ) => Promise<GroupMembersResponse>
+  getUserGroupsFull: (userId: number) => Promise<UserGroupMembership[]>
+  getPendingGroupRequests: (cookie: string) => Promise<PendingGroupRequest[]>
+  getGroupSocialLinks: (cookie: string, groupId: number) => Promise<GroupSocialLink[]>
+  getGroupThumbnails: (groupIds: number[]) => Promise<Record<number, string>>
+  cancelPendingGroupRequest: (cookie: string, groupId: number) => Promise<SuccessResponse>
+  leaveGroup: (cookie: string, groupId: number) => Promise<SuccessResponse>
+  searchGroupStore: (
+    groupId: number,
+    keyword?: string,
+    cursor?: string,
+    limit?: number,
+    cookie?: string
+  ) => Promise<GroupStoreResponse>
+}
+
+// Transactions API types
+import type {
+  TransactionTotals,
+  TransactionTimeFrame
+} from '../../../shared/ipc-schemas/transactions'
+
+export interface TransactionsApi {
+  getTransactionTypes: (cookie: string) => Promise<TransactionTypes>
+  getTransactions: (
+    cookie: string,
+    transactionType: TransactionTypeEnum,
+    cursor?: string,
+    limit?: number
+  ) => Promise<TransactionsResponse>
+  getTransactionTotals: (
+    cookie: string,
+    timeFrame?: TransactionTimeFrame
+  ) => Promise<TransactionTotals>
+}
+
+export interface UpdaterApi {
+  checkForUpdates: () => Promise<UpdateState>
+  downloadUpdate: () => Promise<UpdateActionResult>
+  installUpdate: () => Promise<UpdateActionResult>
+  getUpdaterState: () => Promise<UpdateState>
+  onUpdaterStatus: (callback: (state: UpdateState) => void) => () => void
+}
+
+// Catalog Database API types
+export interface CatalogDbSearchResult {
+  AssetId: number
+  Name: string
+  Description: string
+  AssetTypeId: number
+  IsLimited: boolean
+  IsLimitedUnique: boolean
+  PriceInRobux: number
+  IsForSale: boolean
+  Sales: number
+}
+
+export interface CatalogDbItem {
+  AssetId: number
+  ProductId: number | null
+  Name: string
+  Description: string | null
+  ProductType: string | null
+  AssetTypeId: number | null
+  Created: string | null
+  Updated: string | null
+  PriceInRobux: number | null
+  Sales: number
+  IsForSale: boolean
+  IsLimited: boolean
+  IsLimitedUnique: boolean
+  CollectiblesItemDetails: string | null
+}
+
+export interface SalesData {
+  id: number
+  sales: number
+}
+
+export interface CatalogIndexExport {
+  version: number
+  catalogHash: string
+  catalogIndex: Record<string, string>
+  catalogItems: [number, CatalogDbSearchResult][]
+}
+
+export interface CatalogDatabaseApi {
+  getAllCatalogItems: () => Promise<CatalogDbSearchResult[]>
+  getCatalogIndexExport: () => Promise<CatalogIndexExport>
+  searchCatalogDb: (query: string, limit?: number) => Promise<CatalogDbSearchResult[]>
+  getCatalogItemById: (assetId: number) => Promise<CatalogDbItem | null>
+  getSalesData: (assetId: number) => Promise<SalesData | null>
+  getBatchSalesData: (assetIds: number[]) => Promise<Record<number, number>>
+  getCatalogItemCount: () => Promise<number>
+  getCatalogDbStatus: () => Promise<CatalogDbStatus>
+  downloadCatalogDb: () => Promise<CatalogDbDownloadResult>
+}
+
+export interface CatalogDbStatus {
+  exists: boolean
+  downloading: boolean
+  error: string | null
+  path: string
+}
+
+export interface CatalogDbDownloadResult {
+  success: boolean
+  error?: string
+}
+
+export interface NewsApi {
+  news: {
+    getAnnouncements: () => Promise<any[]>
+    createAnnouncement: (
+      content: string,
+      username: string,
+      media?: any[]
+    ) => Promise<any>
+    deleteAnnouncement: (id: string) => Promise<any>
+    updateAnnouncement: (id: string, updates: any) => Promise<any>
+  }
+}
+
+export interface AccountSettingsApi {
+  // GET methods
+  getAccountSettingsJson: (cookie: string) => Promise<AccountSettingsJson>
+  getUserSettingsAndOptions: (cookie: string) => Promise<UserSettingsAndOptions>
+  getCombinedAccountSettings: (cookie: string) => Promise<CombinedAccountSettings>
+  getThemeTypes: (cookie: string) => Promise<string[]>
+  // UPDATE methods
+  updateInventoryPrivacy: (
+    cookie: string,
+    privacyLevel: PrivacyLevel
+  ) => Promise<UpdateSettingResult>
+  updateTradePrivacy: (cookie: string, tradePrivacy: TradePrivacy) => Promise<UpdateSettingResult>
+  updateTradeValue: (cookie: string, tradeValue: TradeValue) => Promise<UpdateSettingResult>
+  updateAppChatPrivacy: (
+    cookie: string,
+    appChatPrivacy: PrivacyLevel
+  ) => Promise<UpdateSettingResult>
+  updateGameChatPrivacy: (
+    cookie: string,
+    gameChatPrivacy: PrivacyLevel
+  ) => Promise<UpdateSettingResult>
+  updatePrivacy: (cookie: string, phoneDiscovery: PrivacyLevel) => Promise<UpdateSettingResult>
+  updateTheme: (cookie: string, userId: number, themeType: string) => Promise<UpdateSettingResult>
+  updateContentRestriction: (
+    cookie: string,
+    level: ContentRestrictionLevel
+  ) => Promise<UpdateSettingResult>
+  updateOnlineStatusPrivacy: (
+    cookie: string,
+    privacy: OnlineStatusPrivacy
+  ) => Promise<UpdateSettingResult>
+  updateWhoCanJoinMeInExperiences: (
+    cookie: string,
+    privacy: PrivacyLevel
+  ) => Promise<UpdateSettingResult>
+  sendVerificationEmail: (cookie: string, freeItem?: boolean) => Promise<UpdateSettingResult>
+  redeemPromoCode: (cookie: string, code: string) => Promise<RedeemPromoCodeResponse>
+  // Account Information API methods
+  getDescription: (cookie: string) => Promise<DescriptionResponse>
+  updateDescription: (cookie: string, description: string) => Promise<UpdateSettingResult>
+  getGender: (cookie: string) => Promise<GenderResponse>
+  updateGender: (cookie: string, gender: string) => Promise<UpdateSettingResult>
+  getBirthdate: (cookie: string) => Promise<BirthdateResponse>
+  updateBirthdate: (
+    cookie: string,
+    birthMonth: number,
+    birthDay: number,
+    birthYear: number
+  ) => Promise<UpdateSettingResult>
+  getPromotionChannels: (cookie: string) => Promise<PromotionChannelsResponse>
+  updatePromotionChannels: (
+    cookie: string,
+    channels: {
+      facebook?: string
+      twitter?: string
+      youtube?: string
+      twitch?: string
+      promotionChannelsVisibilityPrivacy?: string
+    }
+  ) => Promise<UpdateSettingResult>
+}
+
+// Discord Rich Presence types
+export interface DiscordPresenceState {
+  isEnabled: boolean
+  isConnected: boolean
+  currentGame: {
+    name: string
+    placeId: string
+    thumbnailUrl?: string
+  } | null
+  currentTab: string | null
+}
+
+export interface DiscordRPCApi {
+  enableDiscordRPC: () => Promise<boolean>
+  disableDiscordRPC: () => Promise<void>
+  getDiscordRPCState: () => Promise<DiscordPresenceState>
+  setDiscordRPCTab: (tabId: string | null) => Promise<void>
+  isDiscordRPCEnabled: () => Promise<boolean>
+}
+
+// Watcher types
+export interface WatcherSession {
+  id: string
+  username: string
+  displayName?: string
+  userId: string
+  accountId: string
+  avatarUrl?: string
+  placeId: number
+  jobId?: string
+  friendId?: string
+  pid: number
+  logFile: string
+  lastLogSize: number
+  lastUpdate: number
+  status: 'running' | 'crashed' | 'restarting'
+  restartCount: number
+  restartAttempts: number
+  lastCrashTime?: number
+  lastCrashReason?: string
+  launchConfig?: {
+    cookie: string
+    placeId: string | number
+    jobId?: string
+    friendId?: string | number
+    installPath?: string
+  }
+}
+
+export interface WatcherConfig {
+  enabled: boolean
+  autoRestart: boolean
+  restartDelaySeconds: number
+  checkIntervalMs: number
+  logCheckIntervalMs: number
+  enableRAMLimiter?: boolean
+  ramLimitMB?: number
+  enableRAMCleanupAttempts?: boolean
+  enableClientTimeout?: boolean
+  clientTimeoutSeconds?: number
+  enableCPULimiter?: boolean
+  cpuLimitPercent?: number
+  enableCPUWarning?: boolean
+  cpuWarningPercent?: number
+  cpuWarningSustainedChecks?: number
+  enableProcessPolicy?: boolean
+  processPriority?: 'idle' | 'belowNormal' | 'normal' | 'aboveNormal' | 'high'
+  memoryPriority?: 'veryLow' | 'low' | 'medium' | 'belowNormal' | 'normal'
+}
+
+export interface OptimizationConfig {
+  enableRAMLimiter: boolean
+  ramGuardMode: 'warn' | 'autoTrim' | 'aggressiveTrim'
+  ramLimitMB: number
+  enableRAMCleanupAttempts: boolean
+  enableCPUWarning: boolean
+  cpuWarningPercent: number
+  cpuWarningSustainedChecks: number
+  enableProcessPolicy: boolean
+  processPolicyIntervalSeconds: number
+  resourceGuardIntervalSeconds: number
+  processPriority: 'idle' | 'belowNormal' | 'normal' | 'aboveNormal' | 'high'
+  memoryPriority: 'veryLow' | 'low' | 'medium' | 'belowNormal' | 'normal'
+}
+
+export interface OptimizationStatus extends OptimizationConfig {
+  resourceGuardActive: boolean
+  processPolicyActive: boolean
+  nextResourceGuardAt: number | null
+  nextProcessPolicyAt: number | null
+  robloxProcessCount: number
+  robloxPids: number[]
+}
+
+export interface AntiAfkConfig {
+  enabled: boolean
+  intervalMinutes: number
+  inputKey: string
+  minimizeAfterInput: boolean
+  targetMode: 'all' | 'selected'
+  targetPids: number[]
+}
+
+export interface AntiAfkStatus extends AntiAfkConfig {
+  openRobloxPids: number[]
+  openRobloxProcesses: Array<{
+    pid: number
+    accountId?: string
+    username?: string
+    displayName?: string
+    source?: string
+    startedAt?: number
+  }>
+  nextRunAt: number | null
+  lastRunAt: number | null
+  lastRunSummary: string
+}
+
+export interface WatcherEvent {
+  timestamp: number
+  type: 'session-started' | 'session-crashed' | 'session-restarted' | 'session-stopped' | 'resource-warning' | 'error'
+  sessionId: string
+  username: string
+  message: string
+  details?: any
+}
+
+export interface WatcherApi {
+  getSessions: () => Promise<WatcherSession[]>
+  getSession: (sessionId: string) => Promise<WatcherSession | null>
+  start: () => Promise<{ success: boolean }>
+  stop: () => Promise<{ success: boolean }>
+  addSession: (
+    accountId: string,
+    username: string,
+    userId: string,
+    pid: number,
+    placeId: number,
+    logFile: string,
+    launchConfig?: {
+      cookie: string
+      placeId: string | number
+      jobId?: string
+      friendId?: string | number
+      installPath?: string
+    },
+    jobId?: string,
+    friendId?: string
+  ) => Promise<WatcherSession>
+  removeSession: (sessionId: string) => Promise<{ success: boolean }>
+  getConfig: () => Promise<WatcherConfig>
+  setConfig: (config: Partial<WatcherConfig>) => Promise<WatcherConfig>
+  getOptimizationConfig: () => Promise<OptimizationConfig>
+  getOptimizationStatus: () => Promise<OptimizationStatus>
+  setOptimizationConfig: (config: Partial<OptimizationConfig>) => Promise<OptimizationConfig>
+  getAntiAfkConfig: () => Promise<AntiAfkConfig>
+  getAntiAfkStatus: () => Promise<AntiAfkStatus>
+  setAntiAfkConfig: (config: Partial<AntiAfkConfig>) => Promise<AntiAfkConfig>
+  openWindow: () => Promise<{ success: boolean }>
+  getEvents: () => Promise<WatcherEvent[]>
+  clearEvents: () => Promise<{ success: boolean }>
+  clearAll: () => Promise<{ success: boolean }>
+  joinGame: (accountId: string, placeId: number) => Promise<{ success: boolean }>
+  joinPrivateServer: (accountId: string, jobId: string, placeId: number) => Promise<{ success: boolean }>
+  launchGameWithUrl: (accountId: string, placeId: number, url: string) => Promise<{ success: boolean }>
+  autoTrackLaunchedGame: (
+    accountId: string,
+    username: string,
+    userId: string,
+    placeId: number,
+    launchConfig?: {
+      cookie: string
+      placeId: string | number
+      jobId?: string
+      friendId?: string | number
+      installPath?: string
+    },
+    displayName?: string,
+    avatarUrl?: string
+  ) => Promise<WatcherSession | null>
+  onSessionCrashed: (
+    callback: (data: { sessionId: string; username: string; reason: string }) => void
+  ) => () => void
+  onSessionRestarted: (
+    callback: (data: { sessionId: string; username: string; restartCount: number }) => void
+  ) => () => void
+  onSessionsUpdated: (callback: (sessions: WatcherSession[]) => void) => () => void
+  onEvent: (callback: (event: WatcherEvent) => void) => () => void
+}
+
+export interface MacroApi {
+  startRecording: () => Promise<{ success: boolean }>
+  stopRecording: () => Promise<{ success: boolean; events: any[] }>
+  recordMouseMove: (x: number, y: number) => Promise<{ success: boolean }>
+  recordClick: (button?: 'left' | 'right' | 'middle') => Promise<{ success: boolean }>
+  recordKeyPress: (key: string) => Promise<{ success: boolean }>
+  saveMacro: (name: string, events: any[], description?: string) => Promise<{ success: boolean; macro: any }>
+  loadMacro: (macroId: string) => Promise<{ success: boolean; macro?: any; error?: string }>
+  listMacros: () => Promise<{ success: boolean; macros: any[] }>
+  playMacro: (macroId: string, speed?: number) => Promise<{ success: boolean; error?: string }>
+  deleteMacro: (macroId: string) => Promise<{ success: boolean }>
+  isRecording: () => Promise<{ isRecording: boolean }>
+  getRecordingProgress: () => Promise<{ eventCount: number; duration: number }>
+}
+
+export interface SniperApi {
+  startMonitoring: () => Promise<{ success: boolean }>
+  stopMonitoring: () => Promise<{ success: boolean }>
+  updateConfig: (config: any) => Promise<{ success: boolean; config: any }>
+  getConfig: () => Promise<{ success: boolean; config: any }>
+  getMonitoredItems: () => Promise<{ success: boolean; items: any[] }>
+  getHistory: (limit?: number) => Promise<{ success: boolean; history: any[] }>
+  clearHistory: () => Promise<{ success: boolean }>
+  isMonitoring: () => Promise<{ isMonitoring: boolean }>
+  calculateProfit: (purchasePrice: number, resaleValue: number) => Promise<{ success: boolean; profit: number; profitPercent: number }>
+  // Limited Item Watchlist API
+  addLimitedWatch: (itemId: number, itemName: string, minProfitPercent?: number) => Promise<{ success: boolean; watches?: any[]; error?: string }>
+  removeLimitedWatch: (itemId: number) => Promise<{ success: boolean; watches?: any[] }>
+  getLimitedWatches: () => Promise<{ success: boolean; watches?: any[] }>
+  updateLimitedWatch: (itemId: number, updates: any) => Promise<{ success: boolean; watches?: any[] }>
+  // Username Sniper API
+  createSession: (usernames: string[], proxies?: string[], loopEnabled?: boolean, loopCount?: number, checkInterval?: number) => Promise<{ success: boolean; sessionId?: string; error?: string }>
+  getSession: (sessionId: string) => Promise<{ success: boolean; session?: any; error?: string }>
+  startSniper: (sessionId: string) => Promise<{ success: boolean; error?: string }>
+  pauseSession: (sessionId: string) => Promise<{ success: boolean; error?: string }>
+  stopSession: (sessionId: string) => Promise<{ success: boolean; error?: string }>
+  clearSession: (sessionId: string) => Promise<{ success: boolean; error?: string }>
+  getValidUsernames: (sessionId: string) => Promise<{ success: boolean; usernames?: string[]; error?: string }>
+  // Username Sniper event listeners
+  onValid: (callback: (data: { username: string }) => void) => () => void
+  onTaken: (callback: (data: { username: string }) => void) => () => void
+  onCensored: (callback: (data: { username: string }) => void) => () => void
+  onProgress: (callback: (data: { checked: number; total: number; loop: number; totalLoops: number }) => void) => () => void
+  onCompleted: (callback: (data: any) => void) => () => void
+  onError: (callback: (data: any) => void) => () => void
+}
+
+export interface GeneratorApi {
+  generateAccountData: () => Promise<{ success: boolean; accountData: { username: string; password: string; birthDate: string } }>
+  createAccount: () => Promise<{ success: boolean; accountId?: string; error?: string }>
+  launchBrowser: () => Promise<{ success: boolean; error?: string }>
+  fillForm: (accountData: any) => Promise<{ success: boolean; error?: string }>
+  submitForm: () => Promise<{ success: boolean; error?: string }>
+  closeBrowser: () => Promise<{ success: boolean; error?: string }>
+  generateAndSignup: () => Promise<{ success: boolean; accountData: { username: string; password: string; birthDate: string } }>
+  captchaSolved: () => Promise<{ success: boolean; error?: string }>
+  getAccounts: () => Promise<{ success: boolean; accounts: any[] }>
+  clearAccounts: () => Promise<{ success: boolean }>
+  deleteAccount: (accountId: string) => Promise<{ success: boolean }>
+  updateConfig: (config: any) => Promise<{ success: boolean; config: any }>
+  getConfig: () => Promise<{ success: boolean; config: any }>
+  getPassword: (accountId: string) => Promise<{ success: boolean; password: string }>
+  getCookie: (accountId: string) => Promise<{ success: boolean; cookie: string }>
+  createAccountWithUsername: (username: string) => Promise<{ success: boolean; accountId?: string; error?: string }>
+  sniperGetAccounts: () => Promise<{ success: boolean; accounts: any[] }>
+  sniperAddAccount: (account: any) => Promise<{ success: boolean }>
+  sniperRemoveAccount: (accountId: string) => Promise<{ success: boolean }>
+  sniperMoveToMain: (accountId: string) => Promise<{ success: boolean }>
+}
+
+export interface ProxyApi {
+  addProxy: (host: string, port: number, username?: string, password?: string) => Promise<{ success: boolean; proxy: any }>
+  addProxyList: (proxies: string[]) => Promise<{ success: boolean; count: number; proxies: any[] }>
+  testProxy: (proxyId: string) => Promise<{ success: boolean; result: any }>
+  testAllProxies: () => Promise<{ success: boolean; results: any[] }>
+  assignProxy: (accountId: string, proxyId?: string) => Promise<{ success: boolean; proxyId?: string }>
+  getNextProxy: () => Promise<{ success: boolean; proxyId: string | null }>
+  rotateProxy: (accountId: string) => Promise<{ success: boolean; proxyId: string | null }>
+  getProxyForAccount: (accountId: string) => Promise<{ success: boolean; proxy: any }>
+  getAllProxies: () => Promise<{ success: boolean; proxies: any[] }>
+  getAliveProxies: () => Promise<{ success: boolean; proxies: any[]; count: number }>
+  removeProxy: (proxyId: string) => Promise<{ success: boolean }>
+  clearAllProxies: () => Promise<{ success: boolean }>
+  // Auto-swap API
+  startAutoSwap: (intervalHours: number, autoTestBeforeSwap?: boolean) => Promise<{ success: boolean; config?: any }>
+  stopAutoSwap: () => Promise<{ success: boolean }>
+  getAutoSwapConfig: () => Promise<{ success: boolean; config?: any }>
+  isAutoSwapRunning: () => Promise<{ isRunning: boolean }>
+  // Free proxy fetching
+  fetchFreeProxies: () => Promise<{ success: boolean; proxies: string[]; error?: string }>
+}
+
+// ============================================================================
+// NEW PRODUCTION MODULES
+// ============================================================================
+
+// Trading Module Types
+export interface TradingAnalysisResult {
+  itemId: number
+  itemName: string
+  expectedProfit: number
+  profitMargin: number
+  recommendedAction: 'buy' | 'hold' | 'sell'
+  confidence: number
+  timestamp: number
+}
+
+export interface TradingOpportunity {
+  itemId: number
+  itemName: string
+  currentPrice: number
+  resaleValue: number
+  projectedProfit: number
+  profitMarginPercent: number
+  priority: number
+  confidence: number
+}
+
+export interface TradingApi {
+  analyzeItem: (itemId: number, currentPrice: number, resaleValue: number) => Promise<{ success: boolean; analysis?: TradingAnalysisResult; error?: string }>
+  makeTradingDecision: (analysis: TradingAnalysisResult) => Promise<{ success: boolean; decision?: string; reason?: string }>
+  findOpportunities: (items: Array<{ itemId: number; currentPrice: number; resaleValue: number }>) => Promise<{ success: boolean; opportunities?: TradingOpportunity[]; error?: string }>
+  setConfiguration: (config: any) => Promise<{ success: boolean; error?: string }>
+  getConfiguration: () => Promise<{ success: boolean; config?: any; error?: string }>
+  clearCache: () => Promise<{ success: boolean }>
+}
+
+// Browser Automation Module Types
+export interface BrowserAutomationConfig {
+  headless?: boolean
+  timeout?: number
+  waitForNavigation?: boolean
+  customUserAgent?: string
+}
+
+export interface BrowserFormData {
+  [fieldName: string]: string | string[] | boolean | number
+}
+
+export interface BrowserAutomationApi {
+  launch: (config?: BrowserAutomationConfig) => Promise<{ success: boolean; sessionId?: string; error?: string }>
+  navigate: (url: string, waitForNavigation?: boolean) => Promise<{ success: boolean; error?: string }>
+  fillForm: (formData: BrowserFormData, selector?: string) => Promise<{ success: boolean; fieldsFilled?: number; error?: string }>
+  executeAutomation: (steps: any[]) => Promise<{ success: boolean; result?: any; error?: string }>
+  waitForUserInteraction: (timeout?: number) => Promise<{ success: boolean; resumedAt?: number; error?: string }>
+  screenshot: (filename?: string) => Promise<{ success: boolean; path?: string; error?: string }>
+  close: () => Promise<{ success: boolean; error?: string }>
+  isAutomating: () => Promise<{ isAutomating: boolean }>
+  executeJavaScript: (script: string) => Promise<{ success: boolean; result?: any; error?: string }>
+}
+
+// Proxy Management Module Types
+export interface ProxySession {
+  sessionId: string
+  accountId: string
+  proxyId: string
+  assignedAt: number
+  expiresAt?: number
+}
+
+export interface ProxyHealth {
+  proxyId: string
+  isHealthy: boolean
+  lastChecked: number
+  latency: number
+  failureCount: number
+}
+
+export interface ProxyPoolStats {
+  totalProxies: number
+  healthyProxies: number
+  averageLatency: number
+  rotateCycle: number
+}
+
+export interface ProxyMgmtApi {
+  addProxies: (proxies: Array<{ host: string; port: number; username?: string; password?: string }>) => Promise<{ success: boolean; added?: number; error?: string }>
+  importProxies: (filePath: string) => Promise<{ success: boolean; imported?: number; error?: string }>
+  exportProxies: (filePath?: string) => Promise<{ success: boolean; path?: string; error?: string }>
+  testProxies: (proxyIds?: string[]) => Promise<{ success: boolean; results?: ProxyHealth[]; error?: string }>
+  getHealthyProxy: (excludeProxyId?: string) => Promise<{ success: boolean; proxy?: any; error?: string }>
+  assignProxyToSession: (accountId: string, proxyId: string) => Promise<{ success: boolean; session?: ProxySession; error?: string }>
+  releaseSession: (sessionId: string) => Promise<{ success: boolean; error?: string }>
+  getPoolState: () => Promise<{ success: boolean; state?: ProxyPoolStats; error?: string }>
+  setConfiguration: (strategy: 'round-robin' | 'random' | 'fastest' | 'weighted', options?: any) => Promise<{ success: boolean; error?: string }>
+  clearProxies: () => Promise<{ success: boolean; error?: string }>
+}
+
+export type WindowApi = AccountApi &
+  FavoritesApi &
+  SettingsApi &
+  SocialApi &
+  GamesApi &
+  AvatarApi &
+  InventoryApi &
+  LogsApi &
+  DeployApi &
+  InstallationsApi &
+  FlagsApi &
+  RolimonsApi &
+  NetLogApi &
+  CatalogApi &
+  GroupsApi &
+  TransactionsApi &
+  UpdaterApi &
+  CatalogDatabaseApi &
+  NewsApi &
+  AccountSettingsApi &
+  DiscordRPCApi &
+  WatcherApi &
+  MacroApi &
+  SniperApi &
+  GeneratorApi &
+  ProxyApi &
+  TradingApi &
+  BrowserAutomationApi &
+  ProxyMgmtApi &
+  UsersApi &
+  {
+    // Namespaced API access for organization
+    macro: MacroApi
+    sniper: SniperApi
+    generator: GeneratorApi
+    proxy: ProxyApi
+    trading: TradingApi
+    browser: BrowserAutomationApi
+    proxyMgmt: ProxyMgmtApi
+    user: UsersApi
+    watcher: WatcherApi
+  }
+  // DISABLED: License API removed - licensing system disabled
+  // & {
+  //   license: {
+  //     checkAdminStatus: () => Promise<{ isAdmin: boolean; message: string }>
+  //   }
+  // }
