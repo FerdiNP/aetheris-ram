@@ -4,10 +4,7 @@
 
 ![Aetheris Logo](resources/aetheris-logo.png)
 
-[![GitHub stars](https://img.shields.io/github/stars/sashaga2a24/installer?style=for-the-badge)](https://github.com/sashaga2a24/installer/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/sashaga2a24/installer?style=for-the-badge)](https://github.com/sashaga2a24/installer/network)
-[![GitHub issues](https://img.shields.io/github/issues/sashaga2a24/installer?style=for-the-badge)](https://github.com/sashaga2a24/installer/issues)
-[![GitHub license](https://img.shields.io/github/license/sashaga2a24/installer?style=for-the-badge)](LICENSE)
+**Forked From [Sentra](https://github.com/sashaga2a24/sentra)**
 
 **A powerful, cross-platform desktop application for managing your Roblox accounts.**
 
@@ -31,12 +28,7 @@ Aetheris is a robust and user-friendly desktop application designed to streamlin
 
 ## 🖥️ Screenshots
 
-<!-- TODO: Add actual screenshots of the application in action -->
-<!--
-![Screenshot 1: Main Dashboard](path-to-dashboard-screenshot.png)
-![Screenshot 2: Account List](path-to-account-list-screenshot.png)
--->
-*Screenshots coming soon!*
+![Screenshot 1: Account List](https://github.com/user-attachments/assets/d8725efa-c5e7-410a-bf73-ce06e69fcdab)
 
 ## 🛠️ Tech Stack
 
@@ -78,7 +70,7 @@ Follow these steps to get Aetheris up and running on your local machine for deve
 
 1.  **Clone the repository**
     ```bash
-    git clone https://github.com/sashaga2a24/aetheris.git
+    git clone https://github.com/FerdiNP/aetheris.git
     cd aetheris
     ```
 
@@ -221,7 +213,7 @@ This project is licensed under the [GNU General Public License v3.0](LICENSE) - 
 
 ## 📞 Support & Contact
 
--   🐛 Issues: Feel free to report any bugs or suggest features on the [GitHub Issues page](https://github.com/sashaga2a24/aetheris/issues).
+-   🐛 Issues: Feel free to report any bugs or suggest features on the [GitHub Issues page](https://github.com/FerdiNP/aetheris/issues).
 
 ---
 
@@ -229,7 +221,7 @@ This project is licensed under the [GNU General Public License v3.0](LICENSE) - 
 
 **⭐ Star this repo if you find it helpful!**
 
-Made with ❤️ by [sashaga2a24](https://github.com/sashaga2a24)
-Credits to : TITAN Spoofer https://github.com/dutchpsycho/TITAN-Spoofer-Byfron/tree/master (removed from project in latest version)
+Forked, modified, and enhanced by [FerdiNP](https://github.com/FerdiNP)  
+Original project made with ❤️ by [sashaga2a24](https://github.com/sashaga2a24)
 
 </div>
