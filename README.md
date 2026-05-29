@@ -1,4 +1,4 @@
-# 🚀 Aetheris
+# ⭐ Aetheris 💫
 
 <div align="center">
 
